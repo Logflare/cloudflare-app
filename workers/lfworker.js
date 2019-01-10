@@ -1,7 +1,3 @@
-addEventListener("fetch", event => {
-  event.respondWith(handleRequest(event.request))
-})
-
 async function handleRequest(request) {
   const rMeth = request.method
   const rUrl = request.url
@@ -30,3 +26,7 @@ async function handleRequest(request) {
 
   return response
 }
+
+addEventListener("fetch", event => {
+  event.respondWith(handleRequest(event.request))
+})
