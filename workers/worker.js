@@ -7,8 +7,8 @@ async function handleRequest(request) {
   const uAgent = request.headers.get("user-agent")
   const cfRay = request.headers.get("cf-ray")
 
-  const sourceKey = "12a26fa2-b9ea-4d4b-9209-dc9fc25fb758"
-  const apiKey = "SL7NBVZbxN1C"
+  const sourceKey = "xxxxxxxxxxx"
+  const apiKey = "xxxxxxxxxxx"
 
   const response = await fetch(request)
 
