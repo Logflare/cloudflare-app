@@ -1,3 +1,6 @@
+// window is not available in workers so we disable no-restricted-globals
+/* eslint-disable no-restricted-globals */
+
 async function handleRequest(request) {
   const rMeth = request.method
   const rUrl = request.url
