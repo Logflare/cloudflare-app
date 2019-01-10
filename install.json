@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json.schemastore.org/install",
+  "resources": {
+    "body": [
+      {
+        "type": "style",
+        "src": "./build/styles.css"
+      },
+      {
+        "type": "script",
+        "src": "./build/index.js"
+      }
+    ]
+  },
+  "workers": [
+    {
+      "src": "./build/worker.js"
+    }
+  ],
+  "dns": [
+    {
+      "type": "TXT",
+      "content": "Managed TXT Record",
+      "name": "Created by Logflare via Cloudflare",
+      "ttl": 120
+    }
+  ],
+  "preview": {
+    "handlers": [
+      {
+        "options": ["_default"],
+        "execute": "INSTALL_SCOPE.setOptions(INSTALL_OPTIONS)"
+      }
+    ]
+  },
+  "options": {
+    "properties": {
+      "title": {
+        "title": "Title",
+        "type": "string",
+        "default": "Logflare"
+      },
+      "text": {
+        "title": "Description",
+        "type": "string",
+        "format": "textarea",
+        "default": "Tail your Cloudflare logs!"
+      },
+      "source": {
+        "title": "Source Key",
+        "type": "string"
+      }
+    }
+  }
+}
