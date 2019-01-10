@@ -20,8 +20,8 @@ async function handleRequest(request) {
 
   const init = {
     method: "POST",
-    headers: { "X-API-KEY": api_key, "Content-Type": "application/json" },
-    body: JSON.stringify({ source: source_key, logEntry }),
+    headers: { "X-API-KEY": apiKey, "Content-Type": "application/json" },
+    body: JSON.stringify({ source: sourceKey, logEntry }),
   }
 
   const logflare = await fetch("https://logflare.app/api/logs", init)
