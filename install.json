@@ -14,7 +14,7 @@
   },
   "workers": [
     {
-      "src": "./build/worker.js"
+      "src": "./build/lfworker.js"
     }
   ],
   "dns": [
