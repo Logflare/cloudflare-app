@@ -3,20 +3,20 @@ addEventListener("fetch", event => {
 })
 
 async function handleRequest(request) {
-  var rMeth = request.method
-  var rUrl = request.url
-  var uAgent = request.headers.get("user-agent")
-  var cfRay = request.headers.get("cf-ray")
+  const rMeth = request.method
+  const rUrl = request.url
+  const uAgent = request.headers.get("user-agent")
+  const cfRay = request.headers.get("cf-ray")
 
-  var sourceKey = "12a26fa2-b9ea-4d4b-9209-dc9fc25fb758"
-  var apiKey = "SL7NBVZbxN1C"
+  const sourceKey = "12a26fa2-b9ea-4d4b-9209-dc9fc25fb758"
+  const apiKey = "SL7NBVZbxN1C"
 
   const response = await fetch(request)
 
-  var statusCode = response.status
-  var contentLength = response.headers.get("content-legth")
+  const statusCode = response.status
+  const contentLength = response.headers.get("content-legth")
 
-  var logEntry = `${rMeth} | ${statusCode} | ${cfRay} | ${rUrl} | ${uAgent}`
+  const logEntry = `${rMeth} | ${statusCode} | ${cfRay} | ${rUrl} | ${uAgent}`
 
   const init = {
     method: "POST",
