@@ -1,7 +1,8 @@
 // window is not available in workers so we disable no-restricted-globals
 /* eslint-disable no-restricted-globals */
 
-async function handleRequest(request) {
+async function handleRequest(event) {
+  const {request} = event;
   const rMeth = request.method
   const rUrl = request.url
   const uAgent = request.headers.get("user-agent")
@@ -24,7 +25,7 @@ async function handleRequest(request) {
     body: JSON.stringify({ source: sourceKey, log_entry: logEntry }),
   }
 
-  const logflare = await fetch("https://logflare.app/api/logs", init)
+  event.waitUntil(fetch("https://logflare.app/api/logs", init))
 
   // console.log(cIP)
 
@@ -32,5 +33,5 @@ async function handleRequest(request) {
 }
 
 addEventListener("fetch", event => {
-  event.respondWith(handleRequest(event.request))
+  event.respondWith(handleRequest(event))
 })
