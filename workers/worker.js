@@ -21,7 +21,7 @@ async function handleRequest(event) {
 
   const init = {
     method: "POST",
-    headers: { "X-API-KEY": apiKey, "Content-Type": "application/json" },
+    headers: { "X-API-KEY": apiKey, "Content-Type": "application/json", "User-Agent": "Cloudflare Worker" },
     body: JSON.stringify({ source: sourceKey, log_entry: logEntry }),
   }
 
