@@ -1,55 +1,67 @@
 {
-  "$schema": "http://json.schemastore.org/install",
-  "resources": {
-    "body": [
-      {
-        "type": "style",
-        "src": "./build/styles.css"
-      },
-      {
-        "type": "script",
-        "src": "./build/index.js"
-      }
-    ]
-  },
-  "workers": [
-    {
-      "src": "./build/worker.js"
-    }
-  ],
-  "dns": [
-    {
-      "type": "TXT",
-      "content": "Managed TXT Record",
-      "name": "Created by Logflare via Cloudflare",
-      "ttl": 120
-    }
-  ],
-  "preview": {
-    "handlers": [
-      {
-        "options": ["_default"],
-        "execute": "INSTALL_SCOPE.setOptions(INSTALL_OPTIONS)"
-      }
-    ]
-  },
-  "options": {
-    "properties": {
-      "title": {
-        "title": "Title",
-        "type": "string",
-        "default": "Logflare"
-      },
-      "text": {
-        "title": "Description",
-        "type": "string",
-        "format": "textarea",
-        "default": "Tail your Cloudflare logs!"
-      },
-      "source": {
-        "title": "Source Key",
-        "type": "string"
-      }
-    }
-  }
+	"$schema": "http://json.schemastore.org/install",
+	"resources": {
+		"body": [{
+				"type": "style",
+				"src": "./build/styles.css"
+			},
+			{
+				"type": "script",
+				"src": "./build/index.js"
+			}
+		]
+	},
+	"workers": [{
+		"src": "./build/worker.js"
+	}],
+	"hooks": [{
+		"endpoint": "http://requestbin.fullcontact.com/18ct9mt1",
+		"events": ["option-change:account", "item-add"],
+		"block": true,
+		"authenticate": ["account"],
+		"failure": {
+			"action": "notify",
+			"message": "There was an error communicating with Logflare."
+		}
+	}],
+	"preview": {
+		"handlers": [{
+			"options": ["_default"],
+			"execute": "INSTALL_SCOPE.setOptions(INSTALL_OPTIONS)"
+		}]
+	},
+	"options": {
+		"properties": {
+			"account": {
+				"title": "Logflare Account",
+				"type": "object",
+				"format": "account",
+				"services": ["logflare-dev"],
+				"required": true,
+        "order": 1
+			},
+			"accountSources": {
+				"title": "Source",
+				"type": "string",
+				"description": "Which source should we send logs to?",
+				"order": 2,
+				"enum": ["source1", "source2", "source3"],
+				"enumNames": {
+					"source1": "Cloudflare.worker",
+					"source2": "Cloudflare.worker.bots",
+					"source3": "Cloudflare.worker.signups"
+				},
+        "add": {
+          "buttonLabel": "New Source",
+          "description": "Enter the name for your new source",
+          "properties": {
+            "name": {
+              "title": "Source Name",
+              "type": "string"
+            }
+          }
+        }
+			}
+		}
+	}
 }

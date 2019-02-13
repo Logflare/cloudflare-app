@@ -2,12 +2,12 @@
 /* eslint-disable no-restricted-globals */
 
 async function handleRequest(event) {
-  const {request} = event;
+  const { request } = event
   const rMeth = request.method
   const rUrl = request.url
   const uAgent = request.headers.get("user-agent")
   const cfRay = request.headers.get("cf-ray")
-  const cIP= request.headers.get("cf-connecting-ip")
+  const cIP = request.headers.get("cf-connecting-ip")
 
   const sourceKey = "YOUR_SOURCE_KEY"
   const apiKey = "YOUR_API_KEY"
@@ -21,7 +21,11 @@ async function handleRequest(event) {
 
   const init = {
     method: "POST",
-    headers: { "X-API-KEY": apiKey, "Content-Type": "application/json", "User-Agent": "Cloudflare Worker" },
+    headers: {
+      "X-API-KEY": apiKey,
+      "Content-Type": "application/json",
+      "User-Agent": "Cloudflare Worker",
+    },
     body: JSON.stringify({ source: sourceKey, log_entry: logEntry }),
   }
 
