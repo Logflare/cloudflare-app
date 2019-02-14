@@ -15,8 +15,8 @@
 		"src": "./build/worker.js"
 	}],
 	"hooks": [{
-		"endpoint": "http://requestbin.fullcontact.com/18ct9mt1",
-		"events": ["option-change:account", "item-add"],
+		"endpoint": "http://dev.chasegranberry.net/api/cloudflare/event",
+		"events": ["option-change:account", "oauth-login"],
 		"block": true,
 		"authenticate": ["account"],
 		"failure": {
@@ -25,10 +25,7 @@
 		}
 	}],
 	"preview": {
-		"handlers": [{
-			"options": ["_default"],
-			"execute": "INSTALL_SCOPE.setOptions(INSTALL_OPTIONS)"
-		}]
+		"hide": true
 	},
 	"options": {
 		"properties": {
@@ -45,21 +42,10 @@
 				"type": "string",
 				"description": "Which source should we send logs to?",
 				"order": 2,
-				"enum": ["source1", "source2", "source3"],
+        "required": true,
+				"enum": ["source1"],
 				"enumNames": {
-					"source1": "Cloudflare.worker",
-					"source2": "Cloudflare.worker.bots",
-					"source3": "Cloudflare.worker.signups"
-				},
-        "add": {
-          "buttonLabel": "New Source",
-          "description": "Enter the name for your new source",
-          "properties": {
-            "name": {
-              "title": "Source Name",
-              "type": "string"
-            }
-          }
+          "source1": "Sign in to select a source"
         }
 			}
 		}
