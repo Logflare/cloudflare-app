@@ -5,6 +5,7 @@ async function handleRequest(event) {
   const { request } = event
   const rMeth = request.method
   const rUrl = request.url
+  const rHost = request.headers.get("host")
   const uAgent = request.headers.get("user-agent")
   const cfRay = request.headers.get("cf-ray")
   const cIP = request.headers.get("cf-connecting-ip")
@@ -26,7 +27,7 @@ async function handleRequest(event) {
     headers: {
       "X-API-KEY": apiKey,
       "Content-Type": "application/json",
-      "User-Agent": "Cloudflare Worker",
+      "User-Agent": `Cloudflare Worker via ${rHost}`,
     },
     body: JSON.stringify({ source: sourceKey, log_entry: logEntry }),
   }
