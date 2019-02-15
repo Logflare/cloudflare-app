@@ -37,15 +37,21 @@
 				"required": true,
         "order": 1
 			},
-			"accountSources": {
+			"source": {
+        "showIf": {
+          "account": {
+            "op": "!=",
+            "value": ""
+          }
+        },
 				"title": "Source",
 				"type": "string",
 				"description": "Which source should we send logs to?",
 				"order": 2,
         "required": true,
-				"enum": ["source1"],
+				"enum": ["signin"],
 				"enumNames": {
-          "source1": "Sign in to select a source"
+          "signin": "Sign in to select a source"
         }
 			}
 		}

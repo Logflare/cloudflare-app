@@ -9,8 +9,10 @@ async function handleRequest(event) {
   const cfRay = request.headers.get("cf-ray")
   const cIP = request.headers.get("cf-connecting-ip")
 
-  const sourceKey = "YOUR_SOURCE_KEY"
-  const apiKey = "YOUR_API_KEY"
+  const options = INSTALL_OPTIONS
+
+  const sourceKey = options.source
+  const apiKey = options.logflare.api_key
 
   const response = await fetch(request)
 
