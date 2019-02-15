@@ -15,7 +15,7 @@
 		"src": "./build/worker.js"
 	}],
 	"hooks": [{
-		"endpoint": "http://dev.chasegranberry.net/api/cloudflare/event",
+		"endpoint": "https://logflare.app/api/cloudflare/event",
 		"events": ["option-change:account", "oauth-login"],
 		"block": true,
 		"authenticate": ["account"],
@@ -33,7 +33,7 @@
 				"title": "Logflare Account",
 				"type": "object",
 				"format": "account",
-				"services": ["logflare-dev"],
+				"services": ["logflare"],
 				"required": true,
         "order": 1
 			},
