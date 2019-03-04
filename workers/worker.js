@@ -2,6 +2,11 @@
 /* eslint-disable no-restricted-globals */
 
 async function handleRequest(event) {
+  const options = INSTALL_OPTIONS
+  const sourceKey = options.source
+  const apiKey = options.logflare.api_key
+  const headers = options.headers
+
   const { request } = event
   const rMeth = request.method
   const rUrl = request.url
@@ -10,17 +15,14 @@ async function handleRequest(event) {
   const cfRay = request.headers.get("cf-ray")
   const cIP = request.headers.get("cf-connecting-ip")
 
-  const options = INSTALL_OPTIONS
-
-  const sourceKey = options.source
-  const apiKey = options.logflare.api_key
-
   const response = await fetch(request)
-
   const statusCode = response.status
   const contentLength = response.headers.get("content-legth")
+  const cfCacheStatus = response.headers.get("cf-cache-status")
 
-  const logEntry = `${rMeth} | ${statusCode} | ${cIP} | ${cfRay} | ${rUrl} | ${uAgent}`
+  const newLogEntry = headers.map(x => x.header).join(' + " | " + ')
+
+  const logEntry = newLogEntry.replace(/['"]+/g, '')
 
   const init = {
     method: "POST",
