@@ -1,28 +1,54 @@
 // window is not available in workers so we disable no-restricted-globals
 /* eslint-disable no-restricted-globals */
 
+function buildLogEntry(request, response) {
+  const options = INSTALL_OPTIONS
+
+  const logDefs = {
+    rMeth: request.method,
+    rUrl: request.url,
+    uAgent: request.headers.get("user-agent"),
+    cfRay: request.headers.get("cf-ray"),
+    cIP: request.headers.get("cf-connecting-ip"),
+    statusCode: response.status,
+    contentLength: response.headers.get("content-legth"),
+    cfCacheStatus: response.headers.get("cf-cache-status"),
+    contentType: response.headers.get("content-type"),
+    responseConnection: response.headers.get("connection"),
+    requestConnection: request.headers.get("connection"),
+    cacheControl: response.headers.get("cache-control"),
+    acceptRanges: response.headers.get("accept-ranges"),
+    expectCt: response.headers.get("expect-ct"),
+    expires: response.headers.get("expires"),
+    lastModified: response.headers.get("last-modified"),
+    vary: response.headers.get("vary"),
+    server: response.headers.get("server"),
+    etag: response.headers.get("etag"),
+    date: response.headers.get("date"),
+    transferEncoding: response.headers.get("transfer-encoding"),
+  }
+
+  const logArray = []
+
+  options.metadata.forEach(entry => {
+    logArray.push(logDefs[entry.field])
+  })
+
+  const logEntry = logArray.join(" | ")
+
+  return logEntry
+}
+
 async function handleRequest(event) {
+  const { request } = event
+  const response = await fetch(request)
+  const rHost = request.headers.get("host")
+
   const options = INSTALL_OPTIONS
   const sourceKey = options.source
   const apiKey = options.logflare.api_key
-  const headers = options.headers
 
-  const { request } = event
-  const rMeth = request.method
-  const rUrl = request.url
-  const rHost = request.headers.get("host")
-  const uAgent = request.headers.get("user-agent")
-  const cfRay = request.headers.get("cf-ray")
-  const cIP = request.headers.get("cf-connecting-ip")
-
-  const response = await fetch(request)
-  const statusCode = response.status
-  const contentLength = response.headers.get("content-legth")
-  const cfCacheStatus = response.headers.get("cf-cache-status")
-
-  const newLogEntry = headers.map(x => x.header).join(' + " | " + ')
-
-  const logEntry = newLogEntry.replace(/['"]+/g, '')
+  const logEntry = buildLogEntry(request, response)
 
   const init = {
     method: "POST",
