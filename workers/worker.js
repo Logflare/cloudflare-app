@@ -60,9 +60,7 @@ async function handleRequest(event) {
     body: JSON.stringify({ source: sourceKey, log_entry: logEntry }),
   }
 
-  event.waitUntil(fetch("https://logflare.app/api/logs", init))
-
-  // console.log(cIP)
+  event.waitUntil(fetch("https://logflarelogs.com/api/logs", init))
 
   return response
 }
