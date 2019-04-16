@@ -41,8 +41,30 @@ function buildLogEntry(request, response) {
 
 async function handleRequest(event) {
   const { request } = event
+
+  var t1 = Date.now()
   const response = await fetch(request)
+  var originTimeMs =  Date.now() - t1
+
   const rHost = request.headers.get("host")
+  const rUrl = requeset.url
+  const rMeth = request.method
+  var requestMetadata = {}
+
+  for (var pair of requestHeaders.entries()) {
+    requestMetadata[pair[0].replace(/-/g, "_")] = pair[1];
+  }
+
+  const responseHeaders = response.headers
+
+  var responseMetadata = {}
+
+  for (var pair of responseHeaders.entries()) {
+    responseMetadata[pair[0].replace(/-/g, "_")] = pair[1];
+  }
+
+  const statusCode = response.status
+
 
   const options = INSTALL_OPTIONS
   const sourceKey = options.source
@@ -57,7 +79,7 @@ async function handleRequest(event) {
       "Content-Type": "application/json",
       "User-Agent": `Cloudflare Worker via ${rHost}`,
     },
-    body: JSON.stringify({ source: sourceKey, log_entry: logEntry }),
+    body: JSON.stringify({ source: sourceKey, log_entry: logEntry, metadata: {response: {headers: responseMetadata, origin_time: originTimeMs, status_code: statusCode}, request: {url: rUrl, method: rMeth, headers: requestMetadata}}}),
   }
 
   event.waitUntil(fetch("https://logflarelogs.com/api/logs", init))
