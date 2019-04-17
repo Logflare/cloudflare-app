@@ -41,7 +41,7 @@ function buildLogEntry(request, response) {
 
 async function handleRequest(event) {
   const { request } = event
-  const requestHeaders = request.headers
+  const requestHeaders = Array.from(request.headers)
 
   const t1 = Date.now()
   const response = await fetch(request)
@@ -52,17 +52,17 @@ async function handleRequest(event) {
   const rMeth = request.method
   const requestMetadata = {}
 
-  for (const pair of requestHeaders.entries()) {
-    requestMetadata[pair[0].replace(/-/g, "_")] = pair[1]
-  }
+  requestHeaders.forEach(([key, value]) => {
+    requestMetadata[key.replace(/-/g, "_")] = value
+  })
 
-  const responseHeaders = response.headers
+  const responseHeaders = Array.from(response.headers)
 
   const responseMetadata = {}
 
-  for (const pair of responseHeaders.entries()) {
-    responseMetadata[pair[0].replace(/-/g, "_")] = pair[1]
-  }
+  responseHeaders.forEach(([key, value]) => {
+    responseMetadata[key.replace(/-/g, "_")] = value
+  })
 
   const statusCode = response.status
 
