@@ -1,6 +1,8 @@
 // window is not available in workers so we disable no-restricted-globals
 /* eslint-disable no-restricted-globals */
 
+let backoff = 0
+
 function buildLogEntry(request, response) {
   const options = INSTALL_OPTIONS
 
@@ -93,7 +95,15 @@ async function handleRequest(event) {
     }),
   }
 
-  event.waitUntil(fetch("https://logflarelogs.com/api/logs", init))
+  if (backoff < Date.now()) {
+    event.waitUntil(
+      fetch("https://logflarelogs.com/api/logs", init).then(resp => {
+        if (resp.status === 403) {
+          backoff = Date.now() + 10000
+        }
+      }),
+    )
+  }
 
   return response
 }
