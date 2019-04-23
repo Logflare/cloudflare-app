@@ -52,6 +52,7 @@ async function handleRequest(event) {
   const rHost = request.headers.get("host")
   const rUrl = request.url
   const rMeth = request.method
+  const rCf = request.cf
   const requestMetadata = {}
 
   requestHeaders.forEach(([key, value]) => {
@@ -90,7 +91,12 @@ async function handleRequest(event) {
           origin_time: originTimeMs,
           status_code: statusCode,
         },
-        request: { url: rUrl, method: rMeth, headers: requestMetadata },
+        request: {
+          url: rUrl,
+          method: rMeth,
+          headers: requestMetadata,
+          cf: rCf,
+        },
       },
     }),
   }
