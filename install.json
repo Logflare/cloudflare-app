@@ -1,16 +1,5 @@
 {
 	"$schema": "http://json.schemastore.org/install",
-	"resources": {
-		"body": [{
-				"type": "style",
-				"src": "./build/styles.css"
-			},
-			{
-				"type": "script",
-				"src": "./build/index.js"
-			}
-		]
-	},
 	"workers": [{
 		"src": "./build/worker.js"
 	}],
