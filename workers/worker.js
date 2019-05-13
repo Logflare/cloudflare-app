@@ -103,8 +103,8 @@ async function handleRequest(event) {
 
   if (backoff < Date.now()) {
     event.waitUntil(
-      fetch("https://logflarelogs.com/api/logs", init).then(resp => {
-        if (resp.status === 403) {
+      fetch("https://api.logflare.app/logs/cloudflare", init).then(resp => {
+        if (resp.status === 403 || resp.status === 429) {
           backoff = Date.now() + 10000
         }
       }),
@@ -116,6 +116,6 @@ async function handleRequest(event) {
 
 addEventListener("fetch", event => {
   event.passThroughOnException()
-  
+
   event.respondWith(handleRequest(event))
 })

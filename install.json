@@ -4,7 +4,7 @@
 		"src": "./build/worker.js"
 	}],
 	"hooks": [{
-		"endpoint": "https://logflare.app/api/v1/cloudflare/event",
+		"endpoint": "https://logflare.app/webhooks/cloudflare/v1",
 		"events": ["option-change:account", "oauth-login"],
 		"block": true,
 		"authenticate": ["account"],
