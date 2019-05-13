@@ -115,5 +115,7 @@ async function handleRequest(event) {
 }
 
 addEventListener("fetch", event => {
+  event.passThroughOnException()
+  
   event.respondWith(handleRequest(event))
 })
