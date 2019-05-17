@@ -68,7 +68,6 @@ async function handleRequest(event) {
   const { request } = event
   const requestHeaders = Array.from(request.headers)
 
-  const connectingIp = request.headers["CF-Connecting-IP"]
 
   const t1 = Date.now()
   const response = await fetch(request)
@@ -125,6 +124,8 @@ async function handleRequest(event) {
       },
     },
   }
+
+  const connectingIp = requestMetadata.cf_connecting_ip
 
   if (backoff < Date.now()) {
     event.waitUntil(postLogs(init, connectingIp))
