@@ -2,6 +2,9 @@
 /* eslint-disable no-restricted-globals */
 
 let backoff = 0
+let ipInfoBackoff = 0
+
+const ipInfoToken = ""
 
 function buildLogEntry(request, response) {
   const options = INSTALL_OPTIONS
@@ -41,9 +44,31 @@ function buildLogEntry(request, response) {
   return logEntry
 }
 
+async function fetchIpData(ip) {
+  const resp = await fetch(`https://ipinfo.io/${ip}/json?token=${ipInfoToken}`)
+  if (resp.status !== 200) {
+    ipInfoBackoff = Date.now() + 10000
+    return {}
+  }
+  return resp.json()
+}
+
+async function postLogs(init, connectingIp) {
+  if (ipInfoToken && ipInfoBackoff < Date.now()) {
+    init.body.metadata.request.ipData = await fetchIpData(connectingIp)
+  }
+  init.body = JSON.stringify(init.body)
+  const resp = await fetch("https://api.logflare.app/logs/cloudflare", init)
+  if (resp.status === 403 || resp.status === 429) {
+    backoff = Date.now() + 10000
+  }
+  return resp.json()
+}
+
 async function handleRequest(event) {
   const { request } = event
   const requestHeaders = Array.from(request.headers)
+
 
   const t1 = Date.now()
   const response = await fetch(request)
@@ -82,7 +107,7 @@ async function handleRequest(event) {
       "Content-Type": "application/json",
       "User-Agent": `Cloudflare Worker via ${rHost}`,
     },
-    body: JSON.stringify({
+    body: {
       source: sourceKey,
       log_entry: logEntry,
       metadata: {
@@ -98,17 +123,13 @@ async function handleRequest(event) {
           cf: rCf,
         },
       },
-    }),
+    },
   }
 
+  const connectingIp = requestMetadata.cf_connecting_ip
+
   if (backoff < Date.now()) {
-    event.waitUntil(
-      fetch("https://api.logflare.app/logs/cloudflare", init).then(resp => {
-        if (resp.status === 403 || resp.status === 429) {
-          backoff = Date.now() + 10000
-        }
-      }),
-    )
+    event.waitUntil(postLogs(init, connectingIp))
   }
 
   return response
