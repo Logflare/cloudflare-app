@@ -54,7 +54,7 @@ async function fetchIpData(ip) {
 }
 
 async function postLogs(init, connectingIp) {
-  if (ipInfoToken) {
+  if (ipInfoToken && ipInfoBackoff < Date.now()) {
     init.body.metadata.request.ipData = await fetchIpData(connectingIp)
   }
   init.body = JSON.stringify(init.body)
