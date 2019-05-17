@@ -50,12 +50,13 @@ async function fetchIpData(ip) {
     ipInfoBackoff = Date.now() + 10000
     return {}
   }
-  const json = await resp.json()
-  return json
+  return resp.json()
 }
 
 async function postLogs(init, connectingIp) {
-  init.body.metadata.request.ipData = await fetchIpData(connectingIp)
+  if (ipInfoToken) {
+    init.body.metadata.request.ipData = await fetchIpData(connectingIp)
+  }
   init.body = JSON.stringify(init.body)
   const resp = await fetch("https://api.logflare.app/logs/cloudflare", init)
   if (resp.status === 403 || resp.status === 429) {
