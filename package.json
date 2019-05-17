@@ -8,7 +8,8 @@
     "dev:setup": "npm-run-all lint",
     "build": "npm-run-all lint build:webpack",
     "build:webpack": "NODE_ENV=production webpack --colors",
-    "lint": "node_modules/.bin/eslint --fix --ext .js src workers"
+    "lint": "node_modules/.bin/eslint --fix --ext .js src workers",
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -22,6 +23,7 @@
   "homepage": "https://github.com/cloudflare-apps/create-cloudflare-app#readme",
   "dependencies": {},
   "devDependencies": {
+    "@dollarshaveclub/cloudworker": "^0.0.11",
     "babel-core": "^6.26.3",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^7.0.0",
@@ -35,6 +37,7 @@
     "eslint-watch": "^4.0.2",
     "extract-loader": "^3.0.0",
     "file-loader": "^2.0.0",
+    "mocha": "^6.1.4",
     "prettier": "^1.14.3",
     "style-loader": "^0.23.1",
     "webpack": "^4.24.0",
