@@ -2,6 +2,9 @@
 /* eslint-disable no-restricted-globals */
 
 let backoff = 0
+let ipInfoBackoff = 0
+
+const ipInfoToken = ""
 
 function buildLogEntry(request, response) {
   const options = INSTALL_OPTIONS
@@ -39,6 +42,16 @@ function buildLogEntry(request, response) {
   const logEntry = logArray.join(" | ")
 
   return logEntry
+}
+
+async function fetchIpData(ip) {
+  const resp = await fetch(`https://ipinfo.io/${ip}/json?token=${ipInfoToken}`)
+  if (resp.status !== 200) {
+    ipInfoBackoff = Date.now() + 10000
+    return {}
+  }
+  const json = await resp.json()
+  return json
 }
 
 async function handleRequest(event) {
