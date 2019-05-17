@@ -54,9 +54,21 @@ async function fetchIpData(ip) {
   return json
 }
 
+async function postLogs(init, connectingIp) {
+  init.body.metadata.request.ipData = await fetchIpData(connectingIp)
+  init.body = JSON.stringify(init.body)
+  const resp = await fetch("https://api.logflare.app/logs/cloudflare", init)
+  if (resp.status === 403 || resp.status === 429) {
+    backoff = Date.now() + 10000
+  }
+  return resp.json()
+}
+
 async function handleRequest(event) {
   const { request } = event
   const requestHeaders = Array.from(request.headers)
+
+  const connectingIp = request.headers["CF-Connecting-IP"]
 
   const t1 = Date.now()
   const response = await fetch(request)
@@ -95,7 +107,7 @@ async function handleRequest(event) {
       "Content-Type": "application/json",
       "User-Agent": `Cloudflare Worker via ${rHost}`,
     },
-    body: JSON.stringify({
+    body: {
       source: sourceKey,
       log_entry: logEntry,
       metadata: {
@@ -111,17 +123,11 @@ async function handleRequest(event) {
           cf: rCf,
         },
       },
-    }),
+    },
   }
 
   if (backoff < Date.now()) {
-    event.waitUntil(
-      fetch("https://api.logflare.app/logs/cloudflare", init).then(resp => {
-        if (resp.status === 403 || resp.status === 429) {
-          backoff = Date.now() + 10000
-        }
-      }),
-    )
+    event.waitUntil(postLogs(init, connectingIp))
   }
 
   return response
