@@ -42,15 +42,6 @@ function buildLogEntry(request, response) {
   return logArray.join(" | ")
 }
 
-async function fetchIpData(ip) {
-  const resp = await fetch(`https://ipinfo.io/${ip}/json?token=${ipInfoToken}`)
-  if (resp.status !== 200) {
-    ipInfoBackoff = Date.now() + 10000
-    return {}
-  }
-  return resp.json()
-}
-
 async function fetchIpDataWithCache(ip) {
   const {
     ipinfoIo: { maxAge },
@@ -68,8 +59,12 @@ async function fetchIpDataWithCache(ip) {
   const cachedResponse = await cache.match(cacheKey)
 
   if (!cachedResponse) {
-    const newResponse = await fetch(cacheKey)
-    const newCachedResponse = new Response(newResponse.body, newResponse)
+    const resp = await fetch(cacheKey)
+    if (resp.status !== 200) {
+      ipInfoBackoff = Date.now() + 10000
+      return {}
+    }
+    const newCachedResponse = new Response(resp.body, resp)
     newCachedResponse.headers.set("Cache-Control", `max-age=${maxAge}`)
     await cache.put(cacheKey, newCachedResponse.clone())
     return newCachedResponse
@@ -80,7 +75,8 @@ async function fetchIpDataWithCache(ip) {
 
 async function postLogs(init, connectingIp) {
   if (ipInfoToken && ipInfoBackoff < Date.now()) {
-    init.body.metadata.request.ipData = await fetchIpData(connectingIp)
+    const ipDataResponse = await fetchIpDataWithCache(connectingIp)
+    init.body.metadata.request.ipData = await ipDataResponse.json()
   }
   init.body = JSON.stringify(init.body)
   const resp = await fetch("https://api.logflare.app/logs/cloudflare", init)
