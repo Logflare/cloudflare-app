@@ -1,5 +1,6 @@
 const ipInfoToken = process.env.IPINFO_API_TOKEN
 const logflareApiKey = process.env.LOGFLARE_API_KEY
+const logflareSource = process.env.LOGFLARE_TEST_SOURCE
 
 const headers = [
   "rMeth",
@@ -27,7 +28,7 @@ const headers = [
 
 const options = {
   env: "test",
-  source: "9684afe0-21b5-4ba5-92b3-049777a9f053",
+  source: logflareSource,
   logflare: {
     api_key: logflareApiKey,
   },
