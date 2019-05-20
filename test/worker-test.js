@@ -11,11 +11,6 @@ const worker = fs.readFileSync("workers/worker.js", "utf8")
 
 const bindings = { INSTALL_OPTIONS: options }
 
-const { context } = new Cloudworker(worker, {
-  enableCache: true,
-  bindings,
-})
-
 const ipInfoDataFor8888 = {
   city: "Mountain View",
   country: "US",
@@ -29,37 +24,24 @@ const ipInfoDataFor8888 = {
 }
 
 before(async () => {
+  const { context } = new Cloudworker(worker, {
+    enableCache: true,
+    bindings,
+  })
   Object.assign(global, context)
 })
 
 describe("Cloudflare Worker test", () => {
-  it("correctly fetches IP data from ipinfo.io", async () => {
-    const ipData = await fetchIpData("8.8.8.8")
-    assert.deepEqual(ipData, {
-      city: "Mountain View",
-      country: "US",
-      hostname: "google-public-dns-a.google.com",
-      ip: "8.8.8.8",
-      loc: "37.3860,-122.0840",
-      org: "AS15169 Google LLC",
-      phone: "650",
-      postal: "94035",
-      region: "California",
-    })
-  })
-
-  it("correctly caches fetched IP data from ipinfo.io", async () => {
+  it("correctly fetches and caches fetched IP data from ipinfo.io", async () => {
     const initialResponse = await fetchIpDataWithCache("8.8.8.8")
     const initialJson = await initialResponse.json()
-
+    assert.equal(initialResponse.headers.get("cf-cache-status"), null)
     assert.deepEqual(initialJson, ipInfoDataFor8888)
 
     const cachedResponse = await fetchIpDataWithCache("8.8.8.8")
     const cachedJson = await cachedResponse.json()
-
+    assert.equal(cachedResponse.headers.get("cf-cache-status"), "HIT")
     assert.deepEqual(cachedJson, ipInfoDataFor8888)
-
-    assert(cachedResponse.headers.get("cf-cache-status"), "HIT")
   })
 
   it("correctly POSTs logs to Logflare API", async () => {
@@ -106,7 +88,7 @@ describe("Cloudflare Worker test", () => {
               cf_connecting_ip: "66.249.73.70",
               cf_ipcountry: "US",
               cf_ray: "4d77c945dd49d25e",
-              cf_visitor: "{\"scheme\":\"https\"}",
+              cf_visitor: '{"scheme":"https"}',
               connection: "Keep-Alive",
               host: "logflare.app",
               user_agent:
@@ -127,9 +109,9 @@ describe("Cloudflare Worker test", () => {
               content_length: "202",
               content_type: "text/plain",
               date: "Wed, 15 May 2019 20:15:50 GMT",
-              etag: "\"5cdc59bc-ca\"",
+              etag: '"5cdc59bc-ca"',
               expect_ct:
-                "max-age=604800, report-uri=\"https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct\"",
+                'max-age=604800, report-uri="https://report-uri.cloudflare.com/cdn-cgi/beacon/expect-ct"',
               expires: "Thu, 16 May 2019 00:15:50 GMT",
               last_modified: "Wed, 15 May 2019 18:26:04 GMT",
               server: "cloudflare",
@@ -146,4 +128,3 @@ describe("Cloudflare Worker test", () => {
     assert.deepEqual(resp, { message: "Logged!" })
   })
 })
-

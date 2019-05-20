@@ -37,6 +37,7 @@ const options = {
     ipData: {
       ipinfoIo: {
         token: ipInfoToken,
+        maxAge: "86400",
       },
     },
   },
