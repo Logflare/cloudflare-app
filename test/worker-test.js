@@ -46,6 +46,7 @@ describe("Cloudflare Worker test", () => {
 
   it("correctly POSTs logs to Logflare API", async () => {
     const apiKey = process.env.LOGFLARE_API_KEY
+    const sourceId = process.env.LOGFLARE_TEST_SOURCE
     const init = {
       method: "POST",
       headers: {
@@ -54,7 +55,7 @@ describe("Cloudflare Worker test", () => {
         "User-Agent": `Cloudflare Worker via 0.0.0.0`,
       },
       body: {
-        source: "9684afe0-21b5-4ba5-92b3-049777a9f053",
+        source: sourceId,
         log_entry: "Message from Cloudflare worker testing",
         metadata: {
           request: {
