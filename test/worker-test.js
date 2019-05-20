@@ -1,15 +1,20 @@
 /* eslint-disable global-require */
 /* eslint-disable no-undef */
 
-before(async () => {
-  Object.assign(
-    global,
-    new (require("@dollarshaveclub/cloudworker"))(
-      require("fs").readFileSync("workers/worker.js", "utf8"),
-    ).context,
-  )
+const fs = require("fs")
+const Cloudworker = require("@dollarshaveclub/cloudworker")
+
+const worker = fs.readFileSync("workers/worker.js", "utf8")
+
+const { context } = new Cloudworker(worker, {
+  bindings: { INSTALL_OPTIONS: {} },
 })
+
 const assert = require("assert")
+
+before(async () => {
+  Object.assign(global, context)
+})
 
 describe("Cloudflare Worker test", () => {
   it("correctly fetches IP data from ipinfo.io", async () => {
