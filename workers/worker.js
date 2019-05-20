@@ -39,9 +39,7 @@ function buildLogEntry(request, response) {
     logArray.push(logDefs[entry.field])
   })
 
-  const logEntry = logArray.join(" | ")
-
-  return logEntry
+  return logArray.join(" | ")
 }
 
 async function fetchIpData(ip) {
@@ -51,6 +49,33 @@ async function fetchIpData(ip) {
     return {}
   }
   return resp.json()
+}
+
+async function fetchIpDataWithCache(ip) {
+  const {
+    ipinfoIo: { maxAge },
+  } = options.services.ipData
+
+  const cache = caches.default
+
+  const url = new URL(`https://ipinfo.io/${ip}/json?token=${ipInfoToken}`)
+
+  const cacheKey = new Request(url, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  })
+
+  const cachedResponse = await cache.match(cacheKey)
+
+  if (!cachedResponse) {
+    const newResponse = await fetch(cacheKey)
+    const newCachedResponse = new Response(newResponse.body, newResponse)
+    newCachedResponse.headers.set("Cache-Control", `max-age=${maxAge}`)
+    await cache.put(cacheKey, newCachedResponse.clone())
+    return newCachedResponse
+  }
+
+  return cachedResponse
 }
 
 async function postLogs(init, connectingIp) {
