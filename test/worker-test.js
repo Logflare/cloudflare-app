@@ -9,10 +9,24 @@ const options = require("./install_options")
 
 const worker = fs.readFileSync("workers/worker.js", "utf8")
 
+const bindings = { INSTALL_OPTIONS: options }
+
 const { context } = new Cloudworker(worker, {
-  bindings: { INSTALL_OPTIONS: options },
+  enableCache: true,
+  bindings,
 })
 
+const ipInfoDataFor8888 = {
+  city: "Mountain View",
+  country: "US",
+  hostname: "google-public-dns-a.google.com",
+  ip: "8.8.8.8",
+  loc: "37.3860,-122.0840",
+  org: "AS15169 Google LLC",
+  phone: "650",
+  postal: "94035",
+  region: "California",
+}
 
 before(async () => {
   Object.assign(global, context)
@@ -32,6 +46,20 @@ describe("Cloudflare Worker test", () => {
       postal: "94035",
       region: "California",
     })
+  })
+
+  it("correctly caches fetched IP data from ipinfo.io", async () => {
+    const initialResponse = await fetchIpDataWithCache("8.8.8.8")
+    const initialJson = await initialResponse.json()
+
+    assert.deepEqual(initialJson, ipInfoDataFor8888)
+
+    const cachedResponse = await fetchIpDataWithCache("8.8.8.8")
+    const cachedJson = await cachedResponse.json()
+
+    assert.deepEqual(cachedJson, ipInfoDataFor8888)
+
+    assert(cachedResponse.headers.get("cf-cache-status"), "HIT")
   })
 
   it("correctly POSTs logs to Logflare API", async () => {
@@ -118,3 +146,4 @@ describe("Cloudflare Worker test", () => {
     assert.deepEqual(resp, { message: "Logged!" })
   })
 })
+
