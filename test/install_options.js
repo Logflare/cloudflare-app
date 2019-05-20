@@ -26,13 +26,12 @@ const headers = [
 ]
 
 const options = {
-  source: "js_worker_testing_source",
+  env: "test",
+  source: "9684afe0-21b5-4ba5-92b3-049777a9f053",
   logflare: {
     api_key: logflareApiKey,
   },
-  metadata: {
-    headers,
-  },
+  metadata: headers,
   services: {
     ipData: {
       ipinfoIo: {
