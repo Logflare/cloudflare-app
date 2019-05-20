@@ -4,11 +4,11 @@
 let backoff = 0
 let ipInfoBackoff = 0
 
-const ipInfoToken = ""
+const options = INSTALL_OPTIONS
+
+const ipInfoToken = options.services.ipData.ipinfoIo.token
 
 function buildLogEntry(request, response) {
-  const options = INSTALL_OPTIONS
-
   const logDefs = {
     rMeth: request.method,
     rUrl: request.url,
@@ -39,25 +39,49 @@ function buildLogEntry(request, response) {
     logArray.push(logDefs[entry.field])
   })
 
-  const logEntry = logArray.join(" | ")
-
-  return logEntry
+  return logArray.join(" | ")
 }
 
-async function fetchIpData(ip) {
-  const resp = await fetch(`https://ipinfo.io/${ip}/json?token=${ipInfoToken}`)
-  if (resp.status !== 200) {
-    ipInfoBackoff = Date.now() + 10000
-    return {}
+async function fetchIpDataWithCache(ip) {
+  const {
+    ipinfoIo: { maxAge },
+  } = options.services.ipData
+
+  const cache = caches.default
+
+  const url = new URL(`https://ipinfo.io/${ip}/json?token=${ipInfoToken}`)
+
+  const cacheKey = new Request(url, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  })
+
+  const cachedResponse = await cache.match(cacheKey)
+
+  if (!cachedResponse) {
+    const resp = await fetch(cacheKey)
+    if (resp.status !== 200) {
+      ipInfoBackoff = Date.now() + 10000
+      return undefined
+    }
+    const newCachedResponse = new Response(resp.body, resp)
+    newCachedResponse.headers.set("Cache-Control", `max-age=${maxAge}`)
+    await cache.put(cacheKey, newCachedResponse.clone())
+    return newCachedResponse
   }
-  return resp.json()
+
+  return cachedResponse
 }
 
 async function postLogs(init, connectingIp) {
+  const post = init
   if (ipInfoToken && ipInfoBackoff < Date.now()) {
-    init.body.metadata.request.ipData = await fetchIpData(connectingIp)
+    const ipDataResponse = await fetchIpDataWithCache(connectingIp)
+    if (ipDataResponse) {
+      post.body.metadata.request.ipData = await ipDataResponse.json()
+    }
   }
-  init.body = JSON.stringify(init.body)
+  post.body = JSON.stringify(init.body)
   const resp = await fetch("https://api.logflare.app/logs/cloudflare", init)
   if (resp.status === 403 || resp.status === 429) {
     backoff = Date.now() + 10000
@@ -67,8 +91,8 @@ async function postLogs(init, connectingIp) {
 
 async function handleRequest(event) {
   const { request } = event
-  const requestHeaders = Array.from(request.headers)
 
+  const requestHeaders = Array.from(request.headers)
 
   const t1 = Date.now()
   const response = await fetch(request)
@@ -94,7 +118,6 @@ async function handleRequest(event) {
 
   const statusCode = response.status
 
-  const options = INSTALL_OPTIONS
   const sourceKey = options.source
   const apiKey = options.logflare.api_key
 
@@ -129,7 +152,14 @@ async function handleRequest(event) {
   const connectingIp = requestMetadata.cf_connecting_ip
 
   if (backoff < Date.now()) {
-    event.waitUntil(postLogs(init, connectingIp))
+    if (options.env === "test") {
+      const result = await postLogs(init, connectingIp)
+      if (result.message !== "Logged!") {
+        throw new Error(`Logflare API error: ${result.message}`)
+      }
+    } else {
+      event.waitUntil(postLogs(init, connectingIp))
+    }
   }
 
   return response
