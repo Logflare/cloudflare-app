@@ -1,16 +1,18 @@
 /* eslint-disable global-require */
 /* eslint-disable no-undef */
 
+const assert = require("assert")
+
 const fs = require("fs")
 const Cloudworker = require("@dollarshaveclub/cloudworker")
+const options = require("./install_options")
 
 const worker = fs.readFileSync("workers/worker.js", "utf8")
 
 const { context } = new Cloudworker(worker, {
-  bindings: { INSTALL_OPTIONS: {} },
+  bindings: { INSTALL_OPTIONS: options },
 })
 
-const assert = require("assert")
 
 before(async () => {
   Object.assign(global, context)

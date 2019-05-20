@@ -4,11 +4,11 @@
 let backoff = 0
 let ipInfoBackoff = 0
 
-const ipInfoToken = ""
+const options = INSTALL_OPTIONS
+
+const ipInfoToken = options.services.ipData.ipinfoIo.token
 
 function buildLogEntry(request, response) {
-  const options = INSTALL_OPTIONS
-
   const logDefs = {
     rMeth: request.method,
     rUrl: request.url,
@@ -69,7 +69,6 @@ async function handleRequest(event) {
   const { request } = event
   const requestHeaders = Array.from(request.headers)
 
-
   const t1 = Date.now()
   const response = await fetch(request)
   const originTimeMs = Date.now() - t1
@@ -94,7 +93,6 @@ async function handleRequest(event) {
 
   const statusCode = response.status
 
-  const options = INSTALL_OPTIONS
   const sourceKey = options.source
   const apiKey = options.logflare.api_key
 
