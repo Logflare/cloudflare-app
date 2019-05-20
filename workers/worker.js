@@ -88,6 +88,7 @@ async function postLogs(init, connectingIp) {
 
 async function handleRequest(event) {
   const { request } = event
+
   const requestHeaders = Array.from(request.headers)
 
   const t1 = Date.now()
@@ -148,7 +149,14 @@ async function handleRequest(event) {
   const connectingIp = requestMetadata.cf_connecting_ip
 
   if (backoff < Date.now()) {
-    event.waitUntil(postLogs(init, connectingIp))
+    if (options.env === "test") {
+      const result = await postLogs(init, connectingIp)
+      if (result.message !== "Logged!") {
+        throw new Error(`Logflare API error: ${result.message}`)
+      }
+    } else {
+      event.waitUntil(postLogs(init, connectingIp))
+    }
   }
 
   return response
