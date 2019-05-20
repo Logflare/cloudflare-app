@@ -62,7 +62,7 @@ async function fetchIpDataWithCache(ip) {
     const resp = await fetch(cacheKey)
     if (resp.status !== 200) {
       ipInfoBackoff = Date.now() + 10000
-      return {}
+      return undefined
     }
     const newCachedResponse = new Response(resp.body, resp)
     newCachedResponse.headers.set("Cache-Control", `max-age=${maxAge}`)
@@ -74,11 +74,14 @@ async function fetchIpDataWithCache(ip) {
 }
 
 async function postLogs(init, connectingIp) {
+  const post = init
   if (ipInfoToken && ipInfoBackoff < Date.now()) {
     const ipDataResponse = await fetchIpDataWithCache(connectingIp)
-    init.body.metadata.request.ipData = await ipDataResponse.json()
+    if (ipDataResponse) {
+      post.body.metadata.request.ipData = await ipDataResponse.json()
+    }
   }
-  init.body = JSON.stringify(init.body)
+  post.body = JSON.stringify(init.body)
   const resp = await fetch("https://api.logflare.app/logs/cloudflare", init)
   if (resp.status === 403 || resp.status === 429) {
     backoff = Date.now() + 10000
