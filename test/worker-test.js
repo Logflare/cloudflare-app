@@ -44,6 +44,23 @@ describe("Cloudflare Worker test", () => {
     assert.deepEqual(cachedJson, ipInfoDataFor8888)
   })
 
+  it.only("correctly builds Logflare POST request", async () => {
+    const logEntry = "log message"
+    const metadata = { request: { headers: {} }, response: { headers: {} } }
+    const payload = buildLogflareRequest(logEntry, metadata)
+    assert.deepEqual(payload, {
+      body: `{"source":"${
+        options.source
+      }","log_entry":"log message","metadata":{"data":{"request":{"headers":{}},"response":{"headers":{}}}}}`,
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "Cloudflare Worker Debug",
+        "X-API-KEY": "waGnutzQoD7u",
+      },
+      method: "POST",
+    })
+  })
+
   it("correctly POSTs logs to Logflare API", async () => {
     const apiKey = process.env.LOGFLARE_API_KEY
     const sourceId = process.env.LOGFLARE_TEST_SOURCE
