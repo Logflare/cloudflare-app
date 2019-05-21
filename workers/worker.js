@@ -42,6 +42,23 @@ function buildLogEntry(request, response) {
   return logArray.join(" | ")
 }
 
+function buildLogflareRequest(logEntry, data) {
+  return {
+    method: "POST",
+    headers: {
+      "X-API-KEY": apiKey,
+      "Content-Type": "application/json",
+      "User-Agent": `Cloudflare Worker Debug`,
+    },
+    body: JSON.stringify({
+      source: sourceKey,
+      log_entry: logEntry,
+      metadata: {
+        data,
+      },
+    }),
+  }
+}
 async function fetchIpDataWithCache(ip) {
   const {
     ipinfoIo: { maxAge },
