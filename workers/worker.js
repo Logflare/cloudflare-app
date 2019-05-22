@@ -106,7 +106,8 @@ async function postLogs(init, connectingIp) {
     if (ipDataResponse.status === 200) {
       post.body.metadata.request.ipData = await ipDataResponse.json()
     } else {
-      post.body.metadata.request.ipData = { error: await ipDataResponse.json() }
+      ipInfoBackoff = Date.now() + 10000
+      post.body.metadata.request.ipData = { error: await ipDataResponse.text() }
     }
   }
   post.body = JSON.stringify(init.body)
