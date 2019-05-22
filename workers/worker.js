@@ -83,7 +83,7 @@ async function fetchIpDataWithCache(ip) {
     const resp = await fetch(cacheKey)
     if (resp.status !== 200) {
       ipInfoBackoff = Date.now() + 10000
-      return undefined
+      return resp
     }
     const newCachedResponse = new Response(resp.body, resp)
     newCachedResponse.headers.set("Cache-Control", `max-age=${maxAge}`)
@@ -98,8 +98,10 @@ async function postLogs(init, connectingIp) {
   const post = init
   if (ipInfoToken && ipInfoBackoff < Date.now()) {
     const ipDataResponse = await fetchIpDataWithCache(connectingIp)
-    if (ipDataResponse) {
+    if (ipDataResponse.status === 200) {
       post.body.metadata.request.ipData = await ipDataResponse.json()
+    } else {
+      post.body.metadata.request.ipData = { error: await ipDataResponse.json() }
     }
   }
   post.body = JSON.stringify(init.body)
