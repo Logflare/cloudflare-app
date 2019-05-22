@@ -44,7 +44,7 @@ describe("Cloudflare Worker test", () => {
     assert.deepEqual(cachedJson, ipInfoDataFor8888)
   })
 
-  it.only("correctly builds Logflare POST request", async () => {
+  it("correctly builds Logflare POST request", async () => {
     const logEntry = "log message"
     const metadata = { request: { headers: {} }, response: { headers: {} } }
     const payload = buildLogflareRequest(logEntry, metadata)

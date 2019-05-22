@@ -6,7 +6,7 @@ let ipInfoBackoff = 0
 
 const options = INSTALL_OPTIONS
 
-const ipInfoToken = options.services.ipData.ipinfoIo.token
+const { ipInfoToken, ipInfoMaxAge } = options.services
 
 const sourceKey = options.source
 const apiKey = options.logflare.api_key
@@ -72,10 +72,6 @@ async function logToLogflare(logEntry, data) {
 }
 
 async function fetchIpDataWithCache(ip) {
-  const {
-    ipinfoIo: { maxAge },
-  } = options.services.ipData
-
   const cache = caches.default
 
   // Do not switch to HTTPS until this is fixed:
@@ -98,7 +94,7 @@ async function fetchIpDataWithCache(ip) {
       return resp
     }
     cachedResponse = new Response(resp.body, resp)
-    cachedResponse.headers.set("Cache-Control", `max-age=${maxAge}`)
+    cachedResponse.headers.set("Cache-Control", `max-age=${ipInfoMaxAge}`)
     await cache.put(cacheKey, cachedResponse.clone())
     return cachedResponse
   }
