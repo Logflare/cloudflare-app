@@ -10,7 +10,8 @@
     "build:webpack": "NODE_ENV=production webpack --colors",
     "lint": "node_modules/.bin/eslint --fix --ext .js src workers",
     "test": "mocha",
-    "test.watch": "mocha --watch"
+    "test:watch": "mocha --watch",
+    "deploy:staging": "node staging-workflow.js"
   },
   "repository": {
     "type": "git",
