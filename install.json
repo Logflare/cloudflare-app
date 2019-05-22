@@ -42,6 +42,20 @@
 				"enumNames": {
           "signin": "Sign in to select a source"
         }
+			},
+			"ipInfoApiKey": {
+        "showIf": {
+          "account": {
+            "op": "!=",
+            "value": ""
+          }
+        },
+				"title": "IPinfo.io API Key",
+				"type": "string",
+				"description": "Includ your IPinfo.io API key and get enriched data on IP addresses.",
+				"order": 6,
+				"format": "code",
+        "required": false
 			}
 		}
 	}
