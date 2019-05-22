@@ -108,10 +108,10 @@ async function postLogs(init, connectingIp) {
   if (ipInfoToken && ipInfoBackoff < Date.now()) {
     const ipDataResponse = await fetchIpDataWithCache(connectingIp)
     if (ipDataResponse.status === 200) {
-      post.body.metadata.request.ipData = await ipDataResponse.json()
+      post.body.metadata.request.ipInfo = await ipDataResponse.json()
     } else {
       ipInfoBackoff = Date.now() + 10000
-      post.body.metadata.request.ipData = { error: await ipDataResponse.text() }
+      post.body.metadata.request.ipInfo = { error: await ipDataResponse.text() }
     }
   }
   post.body = JSON.stringify(init.body)

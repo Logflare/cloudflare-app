@@ -11,3 +11,7 @@ build
 # IDEs
 
 /.idea/
+
+# Staging
+
+/staging/*

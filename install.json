@@ -50,9 +50,9 @@
             "value": ""
           }
         },
-				"title": "IPinfo.io API Key",
+				"title": "IP Address Data Enrichment (optional)",
 				"type": "string",
-				"description": "Includ your IPinfo.io API key and get enriched data on IP addresses.",
+				"description": "Include your IPInfo.io API key and get enriched data on IP addresses.",
 				"order": 6,
 				"format": "code",
         "required": false
