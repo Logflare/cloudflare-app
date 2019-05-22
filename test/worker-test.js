@@ -48,6 +48,7 @@ describe("Cloudflare Worker test", () => {
     const logEntry = "log message"
     const metadata = { request: { headers: {} }, response: { headers: {} } }
     const payload = buildLogflareRequest(logEntry, metadata)
+    const apiKey = process.env.LOGFLARE_API_KEY
     assert.deepEqual(payload, {
       body: `{"source":"${
         options.source
@@ -55,7 +56,7 @@ describe("Cloudflare Worker test", () => {
       headers: {
         "Content-Type": "application/json",
         "User-Agent": "Cloudflare Worker Debug",
-        "X-API-KEY": "waGnutzQoD7u",
+        "X-API-KEY": apiKey,
       },
       method: "POST",
     })
