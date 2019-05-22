@@ -64,6 +64,13 @@ function buildLogflareRequest(logEntry, data) {
     }),
   }
 }
+
+async function logToLogflare(logEntry, data) {
+  const post = buildLogflareRequest(logEntry, data)
+  const res = await fetch(logflareApiURL, post)
+  return res.json()
+}
+
 async function fetchIpDataWithCache(ip) {
   const {
     ipinfoIo: { maxAge },
