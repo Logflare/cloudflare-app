@@ -6,7 +6,8 @@ let ipInfoBackoff = 0
 
 const options = INSTALL_OPTIONS
 
-const { ipInfoToken, ipInfoMaxAge } = options.services
+const ipInfoToken = options.ipInfoApiKey
+const ipInfoMaxAge = 86400
 
 const sourceKey = options.source
 const apiKey = options.logflare.api_key

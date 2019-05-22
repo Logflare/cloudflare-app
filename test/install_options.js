@@ -35,10 +35,7 @@ const options = {
     api_key: logflareApiKey,
   },
   metadata: headers,
-  services: {
-    ipInfoToken,
-    ipInfoMaxAge,
-  },
+  ipInfoApiKey: ipInfoToken
 }
 
 module.exports = options
