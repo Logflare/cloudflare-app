@@ -1,5 +1,5 @@
 {
-  "name": "@cloudflare-apps/create-cloudflare-app",
+ "name": "@cloudflare-apps/create-cloudflare-app",
   "version": "1.0.0",
   "description": "Cloudflare Apps boilerplate featuring Workers and DNS powered by Webpack and Babel",
   "scripts": {
@@ -9,7 +9,8 @@
     "build": "npm-run-all lint build:webpack",
     "build:webpack": "NODE_ENV=production webpack --colors",
     "lint": "node_modules/.bin/eslint --fix --ext .js src workers",
-    "test": "mocha"
+    "test": "mocha",
+    "test.watch": "mocha --watch"
   },
   "repository": {
     "type": "git",
@@ -21,10 +22,12 @@
     "url": "https://github.com/cloudflare-apps/create-cloudflare-app/issues"
   },
   "homepage": "https://github.com/cloudflare-apps/create-cloudflare-app#readme",
-  "dependencies": {},
+  "dependencies": {
+    "axios": "^0.18.0"
+  },
   "devDependencies": {
     "@dollarshaveclub/cloudworker": "^0.0.11",
-    "babel-core": "^6.26.3",
+    "@babel/core": "^7.4.5",
     "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.0",
     "babel-preset-env": "^1.7.0",
