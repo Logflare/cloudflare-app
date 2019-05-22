@@ -66,7 +66,11 @@ async function fetchIpDataWithCache(ip) {
 
   const cache = caches.default
 
-  const url = new URL(`https://ipinfo.io/${ip}/json?token=${ipInfoToken}`)
+  // Do not switch to HTTPS until this is fixed:
+  // deployed Cloudflare workers throw SSL handshake error
+  // * this doesn't happen neither in cloudflareworkers.com environment
+  // * this also doesn't happen in test console of preview console for deployed workers within Cloudflare dashboard
+  const url = new URL(`http://ipinfo.io/${ip}/json?token=${ipInfoToken}`)
 
   const cacheKey = new Request(url, {
     method: "GET",
