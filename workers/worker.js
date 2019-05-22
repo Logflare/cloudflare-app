@@ -6,7 +6,12 @@ let ipInfoBackoff = 0
 
 const options = INSTALL_OPTIONS
 
-const ipInfoToken = options.services.ipData.ipinfoIo.token
+const { ipInfoToken, ipInfoMaxAge } = options.services
+
+const sourceKey = options.source
+const apiKey = options.logflare.api_key
+
+const logflareApiURL = "https://api.logflare.app/logs/cloudflare"
 
 function buildLogEntry(request, response) {
   const logDefs = {
@@ -42,32 +47,56 @@ function buildLogEntry(request, response) {
   return logArray.join(" | ")
 }
 
-async function fetchIpDataWithCache(ip) {
-  const {
-    ipinfoIo: { maxAge },
-  } = options.services.ipData
+function buildLogflareRequest(logEntry, data) {
+  return {
+    method: "POST",
+    headers: {
+      "X-API-KEY": apiKey,
+      "Content-Type": "application/json",
+      "User-Agent": `Cloudflare Worker Debug`,
+    },
+    body: JSON.stringify({
+      source: sourceKey,
+      log_entry: logEntry,
+      metadata: {
+        data,
+      },
+    }),
+  }
+}
 
+async function logToLogflare(logEntry, data) {
+  const post = buildLogflareRequest(logEntry, data)
+  const res = await fetch(logflareApiURL, post)
+  return res.json()
+}
+
+async function fetchIpDataWithCache(ip) {
   const cache = caches.default
 
-  const url = new URL(`https://ipinfo.io/${ip}/json?token=${ipInfoToken}`)
+  // Do not switch to HTTPS until this is fixed:
+  // deployed Cloudflare workers throw SSL handshake error
+  // * this doesn't happen neither in cloudflareworkers.com environment
+  // * this also doesn't happen in test console of preview console for deployed workers within Cloudflare dashboard
+  const url = new URL(`http://ipinfo.io/${ip}/json?token=${ipInfoToken}`)
 
   const cacheKey = new Request(url, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   })
 
-  const cachedResponse = await cache.match(cacheKey)
+  let cachedResponse = await cache.match(cacheKey)
 
   if (!cachedResponse) {
     const resp = await fetch(cacheKey)
     if (resp.status !== 200) {
       ipInfoBackoff = Date.now() + 10000
-      return undefined
+      return resp
     }
-    const newCachedResponse = new Response(resp.body, resp)
-    newCachedResponse.headers.set("Cache-Control", `max-age=${maxAge}`)
-    await cache.put(cacheKey, newCachedResponse.clone())
-    return newCachedResponse
+    cachedResponse = new Response(resp.body, resp)
+    cachedResponse.headers.set("Cache-Control", `max-age=${ipInfoMaxAge}`)
+    await cache.put(cacheKey, cachedResponse.clone())
+    return cachedResponse
   }
 
   return cachedResponse
@@ -77,12 +106,15 @@ async function postLogs(init, connectingIp) {
   const post = init
   if (ipInfoToken && ipInfoBackoff < Date.now()) {
     const ipDataResponse = await fetchIpDataWithCache(connectingIp)
-    if (ipDataResponse) {
+    if (ipDataResponse.status === 200) {
       post.body.metadata.request.ipData = await ipDataResponse.json()
+    } else {
+      ipInfoBackoff = Date.now() + 10000
+      post.body.metadata.request.ipData = { error: await ipDataResponse.text() }
     }
   }
   post.body = JSON.stringify(init.body)
-  const resp = await fetch("https://api.logflare.app/logs/cloudflare", init)
+  const resp = await fetch(logflareApiURL, post)
   if (resp.status === 403 || resp.status === 429) {
     backoff = Date.now() + 10000
   }
@@ -117,9 +149,6 @@ async function handleRequest(event) {
   })
 
   const statusCode = response.status
-
-  const sourceKey = options.source
-  const apiKey = options.logflare.api_key
 
   const logEntry = buildLogEntry(request, response)
 

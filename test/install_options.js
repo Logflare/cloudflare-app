@@ -1,6 +1,8 @@
-const ipInfoToken = process.env.IPINFO_API_TOKEN
 const logflareApiKey = process.env.LOGFLARE_API_KEY
 const logflareSource = process.env.LOGFLARE_TEST_SOURCE
+
+const ipInfoMaxAge = "86400"
+const ipInfoToken = process.env.IPINFO_API_TOKEN
 
 const headers = [
   "rMeth",
@@ -34,12 +36,8 @@ const options = {
   },
   metadata: headers,
   services: {
-    ipData: {
-      ipinfoIo: {
-        token: ipInfoToken,
-        maxAge: "86400",
-      },
-    },
+    ipInfoToken,
+    ipInfoMaxAge,
   },
 }
 
