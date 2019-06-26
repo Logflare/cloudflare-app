@@ -22,7 +22,7 @@ function buildLogEntry(request, response) {
     cfRay: request.headers.get("cf-ray"),
     cIP: request.headers.get("cf-connecting-ip"),
     statusCode: response.status,
-    contentLength: response.headers.get("content-legth"),
+    contentLength: response.headers.get("content-length"),
     cfCacheStatus: response.headers.get("cf-cache-status"),
     contentType: response.headers.get("content-type"),
     responseConnection: response.headers.get("connection"),
