@@ -1,0 +1,9 @@
+name = "cloudflare-app-dev"
+type = "webpack"
+workers_dev = true
+webpack_config = "webpack.config.js"
+account_id = ""
+
+[env.staging]
+name = "cloudflare-app"
+zone_id = ""

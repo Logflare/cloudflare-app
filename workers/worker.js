@@ -1,73 +1,29 @@
 /* eslint-disable no-restricted-globals */
+import { makeid, sleep, buildMetadataFromHeaders, buildLogMessage } from "./utils"
 
 // Cloudflare App Options
 const options = INSTALL_OPTIONS
-const LOGFLARE_CF_APP_VERSION = "0.4.0"
-options.metadata = options.metadata.map(value => ({ field: value }))
 
-const sleep = ms => {
-  return new Promise(resolve => {
-    setTimeout(resolve, ms)
-  })
-}
-
-const makeid = length => {
-  let text = ""
-  const possible = "ABCDEFGHIJKLMNPQRSTUVWXYZ0123456789"
-  for (let i = 0; i < length; i++)
-    text += possible.charAt(Math.floor(Math.random() * possible.length))
-  return text
-}
-
-const backoff = 0
+// IpInfo
 let ipInfoBackoff = 0
 
 // Batching
 const BATCH_INTERVAL_MS = 10000
+const MAX_REQUESTS_PER_BATCH = 100
+const WORKER_ID = makeid(6)
+
 let logEventsBatch = []
-let workerTimestamp
-const workerId = makeid(6)
 let batchIsRunning = false
-const maxRequestsPerBatch = 1000
+let workerTimestamp
 
 // IpInfo
 const { ipInfoToken, ipInfoMaxAge } = options.services
 
 // Logflare API
-
 const sourceKey = options.source
 const apiKey = options.logflare.api_key
 const logflareApiURL = "https://api.logflare.app/logs/elixir/logger"
 
-function buildLogMessage(request, response) {
-  const logDefs = {
-    rMeth: request.method,
-    rUrl: request.url,
-    uAgent: request.headers.get("user-agent"),
-    cfRay: request.headers.get("cf-ray"),
-    cIP: request.headers.get("cf-connecting-ip"),
-    statusCode: response.status,
-    contentLength: response.headers.get("content-length"),
-    cfCacheStatus: response.headers.get("cf-cache-status"),
-    contentType: response.headers.get("content-type"),
-    responseConnection: response.headers.get("connection"),
-    requestConnection: request.headers.get("connection"),
-    cacheControl: response.headers.get("cache-control"),
-    acceptRanges: response.headers.get("accept-ranges"),
-    expectCt: response.headers.get("expect-ct"),
-    expires: response.headers.get("expires"),
-    lastModified: response.headers.get("last-modified"),
-    vary: response.headers.get("vary"),
-    server: response.headers.get("server"),
-    etag: response.headers.get("etag"),
-    date: response.headers.get("date"),
-    transferEncoding: response.headers.get("transfer-encoding"),
-  }
-
-  const logArray = []
-  options.metadata.forEach(entry => logArray.push(logDefs[entry.field]))
-  return logArray.join(" | ")
-}
 
 const fetchIpDataWithCache = async ip => {
   const cache = caches.default
@@ -92,11 +48,10 @@ const fetchIpDataWithCache = async ip => {
       cachedResponse.headers.set("Cache-Control", `max-age=${ipInfoMaxAge}`)
       await cache.put(cacheKey, cachedResponse.clone())
       return await cachedResponse.json()
-    } else {
-      ipInfoBackoff = Date.now() + 10000
-      return {
-        error: await resp.text(),
-      }
+    }
+    ipInfoBackoff = Date.now() + 10000
+    return {
+      error: await resp.text(),
     }
   }
   return cachedResponse.json()
@@ -115,11 +70,7 @@ async function addToBatch(body, connectingIp) {
 async function handleRequest(event) {
   const { request } = event
 
-  const requestMetadata = {}
-  const requestHeaders = Array.from(request.headers)
-  requestHeaders.forEach(([key, value]) => {
-    requestMetadata[key.replace(/-/g, "_")] = value
-  })
+  const requestMetadata = buildMetadataFromHeaders(request.headers)
 
   const t1 = Date.now()
   const response = await fetch(request)
@@ -129,11 +80,7 @@ async function handleRequest(event) {
   const rMeth = request.method
   const rCf = request.cf
 
-  const responseMetadata = {}
-  const responseHeaders = Array.from(response.headers)
-  responseHeaders.forEach(([key, value]) => {
-    responseMetadata[key.replace(/-/g, "_")] = value
-  })
+  const responseMetadata = buildMetadataFromHeaders(response.headers)
 
   const logflareEventBody = {
     source: sourceKey,
@@ -152,8 +99,8 @@ async function handleRequest(event) {
         cf: rCf,
       },
       logflare_cf_app: {
-        version: LOGFLARE_CF_APP_VERSION,
-        worker_id: workerId,
+        version: CF_APP_VERSION,
+        worker_id: WORKER_ID,
         worker_timestamp: workerTimestamp,
       },
     },
@@ -181,28 +128,30 @@ const postBatch = async () => {
     },
     body,
   }
-  const response = await fetch(logflareApiURL, request)
+
+  await fetch(logflareApiURL, request)
   resetBatch()
   return true
 }
 
-const handleBatch = async event => {
+const handleBatch = async () => {
   batchIsRunning = true
   await sleep(BATCH_INTERVAL_MS)
   try {
     if (logEventsBatch.length > 0) {
-      return postBatch()
+      await postBatch()
     }
   } catch (e) {
     resetBatch()
   }
+  return true
 }
 
 const logRequests = async event => {
   if (!batchIsRunning) {
-    event.waitUntil(handleBatch(event))
+    event.waitUntil(handleBatch())
   }
-  if (logEventsBatch.length >= maxRequestsPerBatch) {
+  if (logEventsBatch.length >= MAX_REQUESTS_PER_BATCH) {
     event.waitUntil(postBatch())
   }
   if (!workerTimestamp) {

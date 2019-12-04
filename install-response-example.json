@@ -1,72 +1,80 @@
 {
-	"install": {
-		"id": "RhVFu328uAOQ",
-		"appId": "local",
-		"versionTag": "1g43Y3Bkymbt",
-		"siteId": "preview",
-		"options": {
-			"account": {
-				"accountId": "Vc-v_q4YpPri",
-				"service": "logflare-dev"
-			},
-			"accountSources": "source1"
-		},
-		"schema": {
-			"properties": {
-				"account": {
-					"_show": true,
-					"format": "account",
-					"order": 1,
-					"productDefinitions": [],
-					"properties": {},
-					"required": true,
-					"services": ["logflare-dev"],
-					"title": "Logflare Account",
-					"type": "object"
-				},
-				"accountSources": {
-					"_show": true,
-					"add": {
-						"buttonLabel": "New Source",
-						"description": "Enter the name for your new source",
-						"properties": {
-							"name": {
-								"title": "Source Name",
-								"type": "string"
-							}
-						}
-					},
-					"default": "source1",
-					"description": "Which source should we send logs to?",
-					"enum": ["source1", "source2", "source3"],
-					"enumNames": {
-						"source1": "Cloudflare.worker",
-						"source2": "Cloudflare.worker.bots",
-						"source3": "Cloudflare.worker.signups"
-					},
-					"order": 2,
-					"productDefinitions": [],
-					"title": "Source",
-					"type": "string"
-				}
-			},
-			"type": "object"
-		},
-		"workers": [{
-			"src": "./build/worker.js"
-		}],
-		"pastDue": false,
-		"installerUserId": "",
-		"subscriptionId": "",
-		"productId": "",
-		"amount": 0,
-		"active": true,
-		"deactivatedAt": null,
-		"refundedAt": null,
-		"deleted": false,
-		"metadata": {
-			"userId": "15bb3b1204d40e15413d371825e57ee6"
-		},
-		"created": null
-	}
+  "install": {
+    "id": "RhVFu328uAOQ",
+    "appId": "local",
+    "versionTag": "1g43Y3Bkymbt",
+    "siteId": "preview",
+    "options": {
+      "account": {
+        "accountId": "Vc-v_q4YpPri",
+        "service": "logflare-dev"
+      },
+      "accountSources": "source1"
+    },
+    "schema": {
+      "properties": {
+        "account": {
+          "_show": true,
+          "format": "account",
+          "order": 1,
+          "productDefinitions": [],
+          "properties": {},
+          "required": true,
+          "services": [
+            "logflare-dev"
+          ],
+          "title": "Logflare Account",
+          "type": "object"
+        },
+        "accountSources": {
+          "_show": true,
+          "add": {
+            "buttonLabel": "New Source",
+            "description": "Enter the name for your new source",
+            "properties": {
+              "name": {
+                "title": "Source Name",
+                "type": "string"
+              }
+            }
+          },
+          "default": "source1",
+          "description": "Which source should we send logs to?",
+          "enum": [
+            "source1",
+            "source2",
+            "source3"
+          ],
+          "enumNames": {
+            "source1": "Cloudflare.worker",
+            "source2": "Cloudflare.worker.bots",
+            "source3": "Cloudflare.worker.signups"
+          },
+          "order": 2,
+          "productDefinitions": [],
+          "title": "Source",
+          "type": "string"
+        }
+      },
+      "type": "object"
+    },
+    "workers": [
+      {
+        "src": "./build/worker.js"
+      }
+    ],
+    "pastDue": false,
+    "installerUserId": "",
+    "subscriptionId": "",
+    "productId": "",
+    "amount": 0,
+    "active": true,
+    "deactivatedAt": null,
+    "refundedAt": null,
+    "deleted": false,
+    "metadata": {
+      "userId": "15bb3b1204d40e15413d371825e57ee6"
+    },
+    "created": null
+  }
 }

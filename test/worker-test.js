@@ -5,7 +5,7 @@ const assert = require("assert")
 
 const fs = require("fs")
 const Cloudworker = require("@dollarshaveclub/cloudworker")
-const options = require("./install_options")
+const options = require("../staging/install_options")
 
 const worker = fs.readFileSync("workers/worker.js", "utf8")
 

@@ -1,7 +1,7 @@
 {
-  "name": "@cloudflare-apps/create-cloudflare-app",
-  "version": "1.0.0",
-  "description": "Cloudflare Apps boilerplate featuring Workers and DNS powered by Webpack and Babel",
+  "name": "logflare-cf-app",
+  "version": "0.4.0",
+  "description": "Logflare App for Cloudflare",
   "scripts": {
     "start": "npm-run-all dev:setup dev:webpack",
     "dev:webpack": "webpack --watch --colors",
@@ -15,16 +15,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cloudflare-apps/create-cloudflare-app.git"
+    "url": "git+https://github.com/Logflare/cloudflare-app.git"
   },
-  "author": "Cloudflare Inc.",
+  "author": "Logflare",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/cloudflare-apps/create-cloudflare-app/issues"
+    "url": "https://github.com/Logflare/cloudflare-app/issues"
   },
-  "homepage": "https://github.com/cloudflare-apps/create-cloudflare-app#readme",
+  "homepage": "https://logflare.app/",
   "dependencies": {
-    "axios": "^0.19.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.5",

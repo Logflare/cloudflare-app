@@ -1,62 +1,75 @@
 {
-	"$schema": "http://json.schemastore.org/install",
-	"workers": [{
-		"src": "./build/worker.js"
-	}],
-	"hooks": [{
-		"endpoint": "https://logflare.app/webhooks/cloudflare/v1",
-		"events": ["option-change:account", "oauth-login"],
-		"block": true,
-		"authenticate": ["account"],
-		"failure": {
-			"action": "notify",
-			"message": "There was an error communicating with Logflare."
-		}
-	}],
-	"preview": {
-		"hide": true
-	},
-	"options": {
-		"properties": {
-			"account": {
-				"title": "Logflare Account",
-				"type": "object",
-				"format": "account",
-				"services": ["logflare"],
-				"required": true,
+  "$schema": "http://json.schemastore.org/install",
+  "workers": [
+    {
+      "src": "./build/worker.js"
+    }
+  ],
+  "hooks": [
+    {
+      "endpoint": "https://logflare.app/webhooks/cloudflare/v1",
+      "events": [
+        "option-change:account",
+        "oauth-login"
+      ],
+      "block": true,
+      "authenticate": [
+        "account"
+      ],
+      "failure": {
+        "action": "notify",
+        "message": "There was an error communicating with Logflare."
+      }
+    }
+  ],
+  "preview": {
+    "hide": true
+  },
+  "options": {
+    "properties": {
+      "account": {
+        "title": "Logflare Account",
+        "type": "object",
+        "format": "account",
+        "services": [
+          "logflare"
+        ],
+        "required": true,
         "order": 1
-			},
-			"source": {
+      },
+      "source": {
         "showIf": {
           "account": {
             "op": "!=",
             "value": ""
           }
         },
-				"title": "Source",
-				"type": "string",
-				"description": "Which source should we send logs to?",
-				"order": 2,
+        "title": "Source",
+        "type": "string",
+        "description": "Which source should we send logs to?",
+        "order": 2,
         "required": true,
-				"enum": ["signin"],
-				"enumNames": {
+        "enum": [
+          "signin"
+        ],
+        "enumNames": {
           "signin": "Sign in to select a source"
         }
-			},
-			"ipInfoApiKey": {
+      },
+      "ipInfoApiKey": {
         "showIf": {
           "account": {
             "op": "!=",
             "value": ""
           }
         },
-				"title": "IP Address Data Enrichment (optional)",
-				"type": "string",
-				"description": "Include your IPInfo.io API key and get enriched data on IP addresses.",
-				"order": 6,
-				"format": "code",
+        "title": "IP Address Data Enrichment (optional)",
+        "type": "string",
+        "description": "Include your IPInfo.io API key and get enriched data on IP addresses.",
+        "order": 6,
+        "format": "code",
         "required": false
-			}
-		}
-	}
+      }
+    }
+  }
 }

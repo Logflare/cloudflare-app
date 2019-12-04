@@ -2,12 +2,14 @@ const path = require("path")
 const webpack = require("webpack")
 
 const isDev = process.env.NODE_ENV !== "production"
+const CF_APP_VERSION = JSON.stringify(require("./package.json").version)
+const INSTALL_OPTIONS = JSON.stringify(require("./staging/install_options.js"))
 
 module.exports = {
   mode: "development",
   devtool: "hidden-source-map",
   entry: {
-    index: "./src/index.js",
+    // index: "./src/index.js",
     worker: "./workers/worker.js",
   },
   output: {
@@ -18,61 +20,9 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       isDev,
+      CF_APP_VERSION,
+      INSTALL_OPTIONS,
     }),
   ],
-  module: {
-    rules: [
-      {
-        test: /src\/.*\.js$/,
-        loader: "babel-loader",
-        exclude: /(node_modules)/,
-        options: {
-          compact: false,
-          presets: [
-            [
-              "env",
-              {
-                targets: {
-                  browsers: ["last 2 versions", "ie >= 10"],
-                },
-              },
-            ],
-          ],
-        },
-      },
-
-      {
-        test: /workers\/.*\.js$/,
-        loader: "babel-loader",
-        exclude: /(node_modules)/,
-        options: {
-          compact: false,
-          presets: [
-            [
-              "env",
-              {
-                targets: {
-                  node: "current",
-                },
-              },
-            ],
-          ],
-        },
-      },
-
-      {
-        test: /\.css$/,
-        use: [
-          {
-            loader: "file-loader",
-            options: {
-              name: "[name].[ext]",
-            },
-          },
-          "extract-loader",
-          "css-loader",
-        ],
-      },
-    ],
-  },
+  target: "webworker",
 }

@@ -15,3 +15,7 @@ build
 # Staging
 
 /staging/*
+
+# Worker built by wrangler
+
+/worker/script.js
