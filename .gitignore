@@ -14,7 +14,8 @@ build
 
 # Staging
 
-/staging/install_options.js
+/staging/*
+!/staging/install_options.js
 
 # Worker built by wrangler
 
