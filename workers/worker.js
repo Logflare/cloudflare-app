@@ -47,7 +47,7 @@ const fetchIpDataWithCache = async ip => {
       cachedResponse = new Response(resp.body, resp)
       cachedResponse.headers.set("Cache-Control", `max-age=${ipInfoMaxAge}`)
       await cache.put(cacheKey, cachedResponse.clone())
-      return await cachedResponse.json()
+      return cachedResponse.json()
     }
     ipInfoBackoff = Date.now() + 10000
     return {

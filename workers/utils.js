@@ -9,7 +9,7 @@ const sleep = ms => {
 const makeid = length => {
   let text = ""
   const possible = "ABCDEFGHIJKLMNPQRSTUVWXYZ0123456789"
-  for (let i = 0; i < length; i++) {
+  for (let i = 0; i < length; i += 1) {
     text += possible.charAt(Math.floor(Math.random() * possible.length))
   }
   return text
