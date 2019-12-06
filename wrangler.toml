@@ -2,7 +2,7 @@ name = "cloudflare-app-dev"
 type = "webpack"
 workers_dev = true
 webpack_config = "webpack.config.js"
-account_id = ""
+account_id = "27d2acf0297c80b3988569e343158cc3"
 
 [env.staging]
 name = "cloudflare-app"
