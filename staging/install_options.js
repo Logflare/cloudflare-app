@@ -35,10 +35,7 @@ const INSTALL_OPTIONS = {
     api_key: logflareApiKey,
   },
   metadata: headers.map(value => ({ field: value })),
-  services: {
-    ipInfoToken,
-    ipInfoMaxAge,
-  },
+  ipInfoApiKey: ipInfoToken,
 }
 
 module.exports = INSTALL_OPTIONS

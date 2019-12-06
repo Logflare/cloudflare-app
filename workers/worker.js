@@ -27,7 +27,8 @@ const BACKOFF_INTERVAL = 10000
 let backoff = Date.now()
 
 // IpInfo
-const { ipInfoToken, ipInfoMaxAge } = options.services
+const ipInfoToken = options.ipInfoApiKey
+const ipInfoMaxAge = 86400
 
 // Logflare API
 const sourceKey = options.source
