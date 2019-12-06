@@ -5,5 +5,9 @@ webpack_config = "webpack.config.js"
 account_id = "27d2acf0297c80b3988569e343158cc3"
 
 [env.staging]
-name = "cloudflare-app"
+name = "cloudflare-app-staging"
 zone_id = ""
+
+[env.production]
+name = "cloudflare-app"
+webpack_config = "webpack.prod.js"

@@ -21,6 +21,11 @@ let logEventsBatch = []
 let batchIsRunning = false
 let workerTimestamp
 
+// Backoff
+
+const BACKOFF_INTERVAL = 10000
+let backoff = Date.now()
+
 // IpInfo
 const { ipInfoToken, ipInfoMaxAge } = options.services
 
@@ -109,8 +114,9 @@ async function handleRequest(event) {
       },
     },
   }
-
-  addToBatch(logflareEventBody, requestMetadata.cf_connecting_ip)
+  if (backoff < Date.now()) {
+    addToBatch(logflareEventBody, requestMetadata.cf_connecting_ip)
+  }
 
   return response
 }
@@ -133,7 +139,12 @@ const postBatch = async () => {
     body,
   }
 
-  await fetch(logflareApiURL, request)
+  const resp = await fetch(logflareApiURL, request)
+
+  if (resp.status === 403 || resp.status === 429) {
+    backoff = Date.now() + BACKOFF_INTERVAL
+  }
+
   resetBatch()
   return true
 }
