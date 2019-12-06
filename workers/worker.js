@@ -1,5 +1,10 @@
 /* eslint-disable no-restricted-globals */
-import { makeid, sleep, buildMetadataFromHeaders, buildLogMessage } from "./utils"
+import {
+  makeid,
+  sleep,
+  buildMetadataFromHeaders,
+  buildLogMessage,
+} from "./utils"
 
 // Cloudflare App Options
 const options = INSTALL_OPTIONS
@@ -8,7 +13,7 @@ const options = INSTALL_OPTIONS
 let ipInfoBackoff = 0
 
 // Batching
-const BATCH_INTERVAL_MS = 10000
+const BATCH_INTERVAL_MS = 250
 const MAX_REQUESTS_PER_BATCH = 100
 const WORKER_ID = makeid(6)
 
@@ -22,8 +27,7 @@ const { ipInfoToken, ipInfoMaxAge } = options.services
 // Logflare API
 const sourceKey = options.source
 const apiKey = options.logflare.api_key
-const logflareApiURL = "https://api.logflare.app/logs/elixir/logger"
-
+const logflareApiURL = "https://api.logflare.app/logs/cloudflare"
 
 const fetchIpDataWithCache = async ip => {
   const cache = caches.default
