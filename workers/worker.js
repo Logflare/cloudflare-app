@@ -108,10 +108,10 @@ async function handleRequest(event) {
         headers: requestMetadata,
         cf: rCf,
       },
-      logflare_cf_app: {
+      logflare_worker: {
         version: CF_APP_VERSION,
         worker_id: WORKER_ID,
-        worker_timestamp: workerTimestamp,
+        worker_started: workerTimestamp,
       },
     },
   }
