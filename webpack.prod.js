@@ -4,7 +4,7 @@ const webpack = require("webpack")
 const CF_APP_VERSION = JSON.stringify(require("./package.json").version)
 
 module.exports = {
-  mode: "production",
+  mode: "development",
   devtool: "source-map",
   entry: {
     worker: "./workers/worker.js",
