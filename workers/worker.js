@@ -130,7 +130,7 @@ const resetBatch = () => {
 
 const postBatch = async () => {
   batchInFlightLength = logEventsBatch.length
-  let batchInFlight = logEventsBatch.slice()
+  const batchInFlight = logEventsBatch.slice()
   resetBatch()
   const rHost = logEventsBatch[0].metadata.host
   const body = JSON.stringify({ batch: batchInFlight, source: sourceKey })
@@ -161,7 +161,7 @@ const handleBatch = async () => {
       await postBatch()
     }
   } catch (e) {
-
+    // continue regardless of error
   }
   batchIsRunning = false
   return true
