@@ -19,6 +19,7 @@ const WORKER_ID = makeid(6)
 
 let logEventsBatch = []
 let batchIsRunning = false
+let batchInFlightLength = 0
 let workerTimestamp
 
 // Backoff
@@ -123,13 +124,16 @@ async function handleRequest(event) {
 }
 
 const resetBatch = () => {
-  logEventsBatch = []
-  batchIsRunning = false
+  logEventsBatch = logEventsBatch.slice(batchInFlightLength - 1)
+  batchInFlightLength = 0
 }
 
 const postBatch = async () => {
+  batchInFlightLength = logEventsBatch.length
+  let batchInFlight = logEventsBatch.slice()
+  resetBatch()
   const rHost = logEventsBatch[0].metadata.host
-  const body = JSON.stringify({ batch: logEventsBatch, source: sourceKey })
+  const body = JSON.stringify({ batch: batchInFlight, source: sourceKey })
   const request = {
     method: "POST",
     headers: {
@@ -146,7 +150,6 @@ const postBatch = async () => {
     backoff = Date.now() + BACKOFF_INTERVAL
   }
 
-  resetBatch()
   return true
 }
 
@@ -158,8 +161,9 @@ const handleBatch = async () => {
       await postBatch()
     }
   } catch (e) {
-    resetBatch()
+
   }
+  batchIsRunning = false
   return true
 }
 
