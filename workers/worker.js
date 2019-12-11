@@ -18,16 +18,15 @@ const MAX_REQUESTS_PER_BATCH = 100
 const WORKER_ID = makeid(6)
 
 let logEventsBatch = []
-let batchIsRunning = false
 let workerTimestamp
 
 // Backoff
 
 const BACKOFF_INTERVAL = 10000
-let backoff = Date.now()
+let backoff = 0
 
 // IpInfo
-const ipInfoToken = false
+const ipInfoToken = options.ipInfoApiKey
 const ipInfoMaxAge = 86400
 
 // Logflare API
@@ -68,14 +67,14 @@ const fetchIpDataWithCache = async ip => {
 }
 
 async function addToBatch(body, connectingIp) {
-  const enrichedBody = body
+  const enrichedBody = { ...body }
   try {
     if (ipInfoToken && ipInfoBackoff < Date.now()) {
       enrichedBody.metadata.request.ipData = await fetchIpDataWithCache(
         connectingIp,
       )
     }
-  } catch (e) {}
+  } catch (e) { }
   logEventsBatch.push(enrichedBody)
 }
 
@@ -117,15 +116,15 @@ async function handleRequest(event) {
       },
     },
   }
-  if (backoff < Date.now()) {
-    addToBatch(logflareEventBody, requestMetadata.cf_connecting_ip)
+  if (backoff <= Date.now()) {
+    event.waitUntil(addToBatch(logflareEventBody, requestMetadata.cf_connecting_ip))
   }
 
   return response
 }
 
 const postBatch = async () => {
-  const batchInFlight = logEventsBatch.slice()
+  const batchInFlight = [...logEventsBatch]
   logEventsBatch = []
   const rHost = batchInFlight[0].metadata.host
   const body = JSON.stringify({ batch: batchInFlight, source: sourceKey })
@@ -146,27 +145,11 @@ const postBatch = async () => {
   return true
 }
 
-const handleBatch = async () => {
-  batchIsRunning = true
-  await sleep(BATCH_INTERVAL_MS)
-  try {
-    if (logEventsBatch.length > 0) {
-      await postBatch()
-    }
-  } catch (e) {
-    // continue regardless of error
-  }
-  batchIsRunning = false
-  return true
-}
-
 const logRequests = async event => {
   if (!workerTimestamp) {
     workerTimestamp = new Date().toISOString()
   }
-  if (!batchIsRunning) {
-    event.waitUntil(handleBatch())
-  }
+  setTimeout(() => event.waitUntil(postBatch()), BATCH_INTERVAL_MS)
   if (logEventsBatch.length >= MAX_REQUESTS_PER_BATCH) {
     event.waitUntil(postBatch())
   }
@@ -175,6 +158,7 @@ const logRequests = async event => {
 
 addEventListener("fetch", event => {
   event.passThroughOnException()
+  event.waitUntil(sleep(600000))
 
   event.respondWith(logRequests(event))
 })
