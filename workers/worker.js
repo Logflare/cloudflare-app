@@ -19,7 +19,6 @@ const WORKER_ID = makeid(6)
 
 let logEventsBatch = []
 let batchIsRunning = false
-let batchInFlightLength = 0
 let workerTimestamp
 
 // Backoff
@@ -28,7 +27,7 @@ const BACKOFF_INTERVAL = 10000
 let backoff = Date.now()
 
 // IpInfo
-const ipInfoToken = options.ipInfoApiKey
+const ipInfoToken = false
 const ipInfoMaxAge = 86400
 
 // Logflare API
@@ -70,11 +69,13 @@ const fetchIpDataWithCache = async ip => {
 
 async function addToBatch(body, connectingIp) {
   const enrichedBody = body
-  if (ipInfoToken && ipInfoBackoff < Date.now()) {
-    enrichedBody.metadata.request.ipData = await fetchIpDataWithCache(
-      connectingIp,
-    )
-  }
+  try {
+    if (ipInfoToken && ipInfoBackoff < Date.now()) {
+      enrichedBody.metadata.request.ipData = await fetchIpDataWithCache(
+        connectingIp,
+      )
+    }
+  } catch (e) {}
   logEventsBatch.push(enrichedBody)
 }
 
@@ -123,16 +124,10 @@ async function handleRequest(event) {
   return response
 }
 
-const resetBatch = () => {
-  logEventsBatch = logEventsBatch.slice(batchInFlightLength - 1)
-  batchInFlightLength = 0
-}
-
 const postBatch = async () => {
-  batchInFlightLength = logEventsBatch.length
   const batchInFlight = logEventsBatch.slice()
-  resetBatch()
-  const rHost = logEventsBatch[0].metadata.host
+  logEventsBatch = []
+  const rHost = batchInFlight[0].metadata.host
   const body = JSON.stringify({ batch: batchInFlight, source: sourceKey })
   const request = {
     method: "POST",
@@ -145,11 +140,9 @@ const postBatch = async () => {
   }
 
   const resp = await fetch(logflareApiURL, request)
-
   if (resp.status === 403 || resp.status === 429) {
     backoff = Date.now() + BACKOFF_INTERVAL
   }
-
   return true
 }
 
@@ -168,14 +161,14 @@ const handleBatch = async () => {
 }
 
 const logRequests = async event => {
+  if (!workerTimestamp) {
+    workerTimestamp = new Date().toISOString()
+  }
   if (!batchIsRunning) {
     event.waitUntil(handleBatch())
   }
   if (logEventsBatch.length >= MAX_REQUESTS_PER_BATCH) {
     event.waitUntil(postBatch())
-  }
-  if (!workerTimestamp) {
-    workerTimestamp = new Date().toISOString()
   }
   return handleRequest(event)
 }
