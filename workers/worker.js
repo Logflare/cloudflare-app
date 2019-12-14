@@ -19,6 +19,7 @@ const WORKER_ID = makeid(6)
 
 let logEventsBatch = []
 let workerTimestamp
+let batchTimeoutStarted
 
 // Backoff
 
@@ -74,7 +75,8 @@ async function addToBatch(body, connectingIp) {
         connectingIp,
       )
     }
-  } catch (e) { }
+  } catch (e) {
+  }
   logEventsBatch.push(enrichedBody)
 }
 
@@ -117,7 +119,9 @@ async function handleRequest(event) {
     },
   }
   if (backoff <= Date.now()) {
-    event.waitUntil(addToBatch(logflareEventBody, requestMetadata.cf_connecting_ip))
+    event.waitUntil(
+      addToBatch(logflareEventBody, requestMetadata.cf_connecting_ip),
+    )
   }
 
   return response
@@ -145,20 +149,28 @@ const postBatch = async () => {
   return true
 }
 
-const logRequests = async event => {
-  if (!workerTimestamp) {
-    workerTimestamp = new Date().toISOString()
+const scheduleBatch = async event => {
+  if (!batchTimeoutStarted) {
+    batchTimeoutStarted = true
+    await sleep(BATCH_INTERVAL_MS)
+    if (logEventsBatch.length > 0) {
+      event.waitUntil(postBatch())
+    }
+    batchTimeoutStarted = false
   }
-  setTimeout(() => event.waitUntil(postBatch()), BATCH_INTERVAL_MS)
-  if (logEventsBatch.length >= MAX_REQUESTS_PER_BATCH) {
-    event.waitUntil(postBatch())
-  }
-  return handleRequest(event)
 }
 
 addEventListener("fetch", event => {
   event.passThroughOnException()
-  event.waitUntil(sleep(600000))
+  event.waitUntil(sleep(30000))
+  event.waitUntil(scheduleBatch(event))
 
-  event.respondWith(logRequests(event))
+  if (!workerTimestamp) {
+    workerTimestamp = new Date().toISOString()
+  }
+  if (logEventsBatch.length >= MAX_REQUESTS_PER_BATCH) {
+    event.waitUntil(postBatch())
+  }
+
+  event.respondWith(handleRequest(event))
 })
