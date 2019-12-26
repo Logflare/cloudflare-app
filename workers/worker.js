@@ -13,7 +13,7 @@ const options = INSTALL_OPTIONS
 let ipInfoBackoff = 0
 
 // Batching
-const BATCH_INTERVAL_MS = 1000
+const BATCH_INTERVAL_MS = 500
 const MAX_REQUESTS_PER_BATCH = 100
 const WORKER_ID = makeid(6)
 
