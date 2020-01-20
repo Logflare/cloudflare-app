@@ -1,6 +1,6 @@
 {
   "name": "logflare-cf-app",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Logflare App for Cloudflare",
   "scripts": {
     "start": "npm-run-all dev:setup dev:wrangler",

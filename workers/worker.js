@@ -22,12 +22,10 @@ let workerTimestamp
 let batchTimeoutReached = true
 let logEventsBatch = []
 
-
 // Backoff
 
 const BACKOFF_INTERVAL = 10000
 let backoff = 0
-
 
 // IpInfo
 const ipInfoToken = options.ipInfoApiKey
@@ -75,8 +73,7 @@ async function addToBatch(body, connectingIp, event) {
     if (ipInfoToken && ipInfoBackoff < Date.now()) {
       body.metadata.request.ipData = await fetchIpDataWithCache(connectingIp)
     }
-  } catch (e) {
-  }
+  } catch (e) {}
   logEventsBatch.push(body)
 
   if (logEventsBatch.length >= MAX_REQUESTS_PER_BATCH) {
@@ -147,7 +144,7 @@ const fetchAndSetBackOff = async (lfRequest, event) => {
 const postBatch = async event => {
   const batchInFlight = [...logEventsBatch]
   logEventsBatch = []
-  const rHost = batchInFlight[0].metadata.host
+  const rHost = batchInFlight[0].metadata.request.headers.host
   const body = JSON.stringify({ batch: batchInFlight, source: sourceKey })
   const request = {
     method: "POST",
